@@ -34,7 +34,6 @@ from sklearn.metrics import (
 # ------------------------------------------------------------------
 st.set_page_config(
     page_title="Dashboard Bank Marketing",
-    page_icon="🏦",
     layout="wide",
 )
 
@@ -71,7 +70,7 @@ def obtener_datos():
 
 df_raw, fuente = obtener_datos()
 
-st.title("🏦 Dashboard: Predicción de Suscripción a Depósito a Plazo Fijo")
+st.title("Dashboard: Predicción de Suscripción a Depósito a Plazo Fijo")
 st.caption("Proyecto Integrador UTEC · Grupo 8 · Bank Marketing (UCI)")
 
 if df_raw is None:
@@ -94,16 +93,16 @@ if faltantes:
 # ------------------------------------------------------------------
 seccion = st.sidebar.radio(
     "Navegación",
-    ["📊 Dashboard EDA", "🤖 Modelo y Métricas", "🔮 Predicción de un cliente"],
+    ["Dashboard EDA", " Modelo y Métricas", "Predicción de un cliente"],
 )
 
 # ==================================================================
 # SECCIÓN 1 — DASHBOARD EDA
 # ==================================================================
-if seccion == "📊 Dashboard EDA":
+if seccion == "Dashboard EDA":
 
     st.sidebar.markdown("---")
-    st.sidebar.header("🔍 Filtros de exploración")
+    st.sidebar.header("Filtros de exploración")
 
     trabajos_sel = st.sidebar.multiselect(
         "Ocupación / trabajo:",
@@ -149,7 +148,7 @@ if seccion == "📊 Dashboard EDA":
     st.markdown("---")
 
     # ---- Gráficos categóricos vs y ----
-    st.subheader("📊 Suscripción por variable categórica")
+    st.subheader("Suscripción por variable categórica")
     col_izq, col_der = st.columns(2)
     with col_izq:
         var_cat = st.selectbox(
@@ -190,7 +189,7 @@ if seccion == "📊 Dashboard EDA":
     st.markdown("---")
 
     # ---- Numéricas vs y ----
-    st.subheader("📈 Variables numéricas vs. resultado")
+    st.subheader(" Variables numéricas vs. resultado")
     col_izq2, col_der2 = st.columns(2)
     with col_izq2:
         var_num = st.selectbox("Elegí la variable numérica:", NUM_COLS, index=NUM_COLS.index("duration"))
@@ -212,7 +211,7 @@ if seccion == "📊 Dashboard EDA":
     st.markdown("---")
 
     # ---- Correlación ----
-    st.subheader("🔗 Correlación entre variables numéricas")
+    st.subheader(" Correlación entre variables numéricas")
     corr = df[NUM_COLS].corr().round(2)
     fig_corr = px.imshow(
         corr, text_auto=True, color_continuous_scale="RdBu_r", zmin=-1, zmax=1,
@@ -221,7 +220,7 @@ if seccion == "📊 Dashboard EDA":
     st.plotly_chart(fig_corr, use_container_width=True)
 
     st.markdown("---")
-    st.subheader("📋 Muestra de datos filtrados")
+    st.subheader("Muestra de datos filtrados")
     st.dataframe(df.head(50), use_container_width=True)
 
 # ==================================================================
@@ -279,9 +278,9 @@ with st.spinner("Entrenando modelos (esto se guarda en caché y solo corre una v
 # ==================================================================
 # SECCIÓN 2 — MODELO Y MÉTRICAS
 # ==================================================================
-if seccion == "🤖 Modelo y Métricas":
+if seccion == "Modelo y Métricas":
 
-    st.subheader("🤖 Comparación de modelos")
+    st.subheader("Comparación de modelos")
     st.markdown(
         "Se entrenaron dos modelos de clasificación con `class_weight='balanced'` "
         "para compensar el desbalance de clases (88.3% no vs. 11.7% sí). "
@@ -302,7 +301,7 @@ if seccion == "🤖 Modelo y Métricas":
     st.dataframe(tabla_metricas.style.background_gradient(cmap="Greens", axis=0), use_container_width=True)
 
     mejor_modelo = tabla_metricas["ROC AUC"].idxmax()
-    st.success(f"📌 Mejor modelo según ROC AUC: **{mejor_modelo}**")
+    st.success(f"Mejor modelo según ROC AUC: **{mejor_modelo}**")
 
     st.markdown("---")
 
@@ -346,9 +345,9 @@ if seccion == "🤖 Modelo y Métricas":
 # ==================================================================
 # SECCIÓN 3 — PREDICCIÓN DE UN CLIENTE NUEVO
 # ==================================================================
-if seccion == "🔮 Predicción de un cliente":
+if seccion == "Predicción de un cliente":
 
-    st.subheader("🔮 ¿Este cliente suscribiría el depósito a plazo?")
+    st.subheader(" ¿Este cliente suscribiría el depósito a plazo?")
     st.markdown("Completá los datos del cliente y el modelo estima la probabilidad de que diga **sí**.")
 
     modelo_pred_nombre = st.selectbox(
@@ -395,7 +394,7 @@ if seccion == "🔮 Predicción de un cliente":
         }])
 
         proba = pipe.predict_proba(cliente)[0, 1]
-        pred = "SÍ suscribiría 🎉" if proba >= 0.5 else "probablemente NO suscribiría"
+        pred = "SÍ suscribiría " if proba >= 0.5 else "probablemente NO suscribiría"
 
         st.markdown("---")
         c1, c2 = st.columns([1, 2])
