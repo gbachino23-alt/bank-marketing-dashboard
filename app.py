@@ -47,6 +47,13 @@ MONTH_ORDER = ["jan", "feb", "mar", "apr", "may", "jun",
                "jul", "aug", "sep", "oct", "nov", "dec"]
 
 # ------------------------------------------------------------------
+# PALETA PASTEL (reemplaza los rojo/verde saturados)
+# ------------------------------------------------------------------
+PASTEL_MAP = {"yes": "#A8E6CF", "no": "#FFB7B2"}          # verde y coral pastel
+PASTEL_SCALE = ["#FFB7B2", "#FFD9B7", "#FFF3B0", "#CDEAC0", "#A8E6CF"]  # coral -> verde pastel
+PASTEL_LINE = "#7A8B99"  # color suave para líneas de referencia
+
+# ------------------------------------------------------------------
 # CARGA DE DATOS
 # ------------------------------------------------------------------
 @st.cache_data
@@ -147,44 +154,48 @@ if seccion == "Dashboard EDA":
 
     st.markdown("---")
 
-    # ---- Gráficos categóricos vs y ----
+    # ---- Gráficos categóricos vs y: frecuencia absoluta + porcentaje lado a lado ----
     st.subheader("Suscripción por variable categórica")
-    col_izq, col_der = st.columns(2)
-    with col_izq:
-        var_cat = st.selectbox(
-            "Elegí la variable categórica:",
-            CAT_COLS,
-            index=CAT_COLS.index("job"),
-        )
-    with col_der:
-        modo_barra = st.radio("Tipo de vista:", ["Cantidades", "Tasa de conversión (%)"], horizontal=True)
 
-    if modo_barra == "Cantidades":
+    var_cat = st.selectbox(
+        "Elegí la variable categórica:",
+        CAT_COLS,
+        index=CAT_COLS.index("job"),
+    )
+
+    col_izq, col_der = st.columns(2)
+
+    with col_izq:
+        st.markdown("**Frecuencia absoluta**")
         df_group = df.groupby([var_cat, "y"]).size().reset_index(name="cantidad")
-        fig = px.bar(
+        fig_abs = px.bar(
             df_group, x=var_cat, y="cantidad", color="y", barmode="group",
             labels={var_cat: var_cat, "cantidad": "Número de clientes", "y": "¿Suscribió?"},
-            color_discrete_map={"yes": "#2ecc71", "no": "#e74c3c"},
+            color_discrete_map=PASTEL_MAP,
             category_orders={"month": MONTH_ORDER} if var_cat == "month" else None,
         )
-    else:
+        fig_abs.update_layout(xaxis_tickangle=-35)
+        st.plotly_chart(fig_abs, use_container_width=True)
+
+    with col_der:
+        st.markdown("**Porcentaje (tasa de conversión)**")
         rate = (
             df.groupby(var_cat)["y"].apply(lambda x: (x == "yes").mean() * 100)
             .reset_index(name="tasa")
             .sort_values("tasa", ascending=False)
         )
-        fig = px.bar(
+        fig_pct = px.bar(
             rate, x=var_cat, y="tasa",
             labels={var_cat: var_cat, "tasa": "% que suscribió"},
-            color="tasa", color_continuous_scale="RdYlGn",
+            color="tasa", color_continuous_scale=PASTEL_SCALE,
         )
-        fig.add_hline(
+        fig_pct.add_hline(
             y=df["y"].eq("yes").mean() * 100,
-            line_dash="dash", line_color="navy",
+            line_dash="dash", line_color=PASTEL_LINE,
             annotation_text="Promedio del grupo filtrado",
         )
-    fig.update_layout(xaxis_tickangle=-35)
-    st.plotly_chart(fig, use_container_width=True)
+        fig_pct.update_layout(xaxis_tickangle=-35)
+        st.plotly_chart(fig_pct, use_container_width=True)
 
     st.markdown("---")
 
@@ -196,14 +207,14 @@ if seccion == "Dashboard EDA":
         fig_box = px.box(
             df, x="y", y=var_num, color="y",
             labels={"y": "¿Suscribió?", var_num: var_num},
-            color_discrete_map={"yes": "#2ecc71", "no": "#e74c3c"},
+            color_discrete_map=PASTEL_MAP,
             points=False,
         )
         st.plotly_chart(fig_box, use_container_width=True)
     with col_der2:
         fig_hist = px.histogram(
             df, x=var_num, color="y", barmode="overlay", opacity=0.6, nbins=40,
-            color_discrete_map={"yes": "#2ecc71", "no": "#e74c3c"},
+            color_discrete_map=PASTEL_MAP,
             labels={"y": "¿Suscribió?"},
         )
         st.plotly_chart(fig_hist, use_container_width=True)
