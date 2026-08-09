@@ -1,17 +1,17 @@
-# 🏦 Dashboard Bank Marketing — Streamlit
+# Dashboard Bank Marketing — Streamlit
 
 App de Streamlit basada en el análisis del Colab `Proyecto_Grupo_8`. Convierte
 el EDA y el objetivo del proyecto (predecir si un cliente suscribe un depósito
 a plazo fijo) en una app interactiva con tres secciones:
 
-1. **📊 Dashboard EDA** — filtros, KPIs y gráficos interactivos (los mismos
+1. **Dashboard EDA** — filtros, KPIs y gráficos interactivos (los mismos
    que ya tenías esbozados en el Colab, más histogramas, boxplots y
    correlación).
-2. **🤖 Modelo y Métricas** — entrena Regresión Logística y Random Forest
+2. **Modelo y Métricas** — entrena Regresión Logística y Random Forest
    (con `class_weight='balanced'` por el desbalance 88.3%/11.7%), y muestra
    accuracy, precision, recall, F1, ROC AUC, matriz de confusión, curva ROC
    e importancia de variables.
-3. **🔮 Predicción de un cliente** — formulario para ingresar los datos de
+3. **Predicción de un cliente** — formulario para ingresar los datos de
    un cliente nuevo y obtener la probabilidad de que suscriba.
 
 ## Cómo correrla
@@ -42,7 +42,7 @@ app te va a mostrar un botón en la barra lateral para subirlo manualmente
 
 ## Desplegar en Streamlit Community Cloud (gratis)
 
-1. Subí esta carpeta (`app.py`, `requirements.txt`, y opcionalmente
+1. Subí esta carpeta (`app.py`, `requirements.txt`,
    `bank-full.csv`) a un repo de GitHub.
 2. Entrá a share.streamlit.io, conectá el repo y elegí `app.py` como
    archivo principal.
