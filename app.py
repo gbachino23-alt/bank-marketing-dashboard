@@ -47,11 +47,13 @@ MONTH_ORDER = ["jan", "feb", "mar", "apr", "may", "jun",
                "jul", "aug", "sep", "oct", "nov", "dec"]
 
 # ------------------------------------------------------------------
-# PALETA PASTEL (reemplaza los rojo/verde saturados)
+# PALETA PASTEL — sin rojo ni verde (solo azules, lilas, durazno y amarillo)
 # ------------------------------------------------------------------
-PASTEL_MAP = {"yes": "#A8E6CF", "no": "#FFB7B2"}          # verde y coral pastel
-PASTEL_SCALE = ["#FFB7B2", "#FFD9B7", "#FFF3B0", "#CDEAC0", "#A8E6CF"]  # coral -> verde pastel
-PASTEL_LINE = "#7A8B99"  # color suave para líneas de referencia
+PASTEL_MAP = {"yes": "#A7C7E7", "no": "#FFD8A8"}   # azul pastel vs. durazno pastel
+PASTEL_SCALE = ["#FFD8A8", "#F6C6D8", "#D9C6EC", "#B8C6E8", "#8FB8DE"]  # durazno -> azul
+PASTEL_LINE = "#7A6F8A"          # lila grisáceo para líneas de referencia
+PASTEL_SINGLE = "#B8C6E8"        # azul lila para barras de una sola serie
+DIVERGING_SCALE = "PuOr"         # violeta <-> naranja, sin rojo ni verde
 
 # ------------------------------------------------------------------
 # CARGA DE DATOS
@@ -100,7 +102,7 @@ if faltantes:
 # ------------------------------------------------------------------
 seccion = st.sidebar.radio(
     "Navegación",
-    ["Dashboard EDA", " Modelo y Métricas", "Predicción de un cliente"],
+    ["Dashboard EDA", "Modelo y Métricas", "Predicción de un cliente"],
 )
 
 # ==================================================================
@@ -173,7 +175,9 @@ if seccion == "Dashboard EDA":
             labels={var_cat: var_cat, "cantidad": "Número de clientes", "y": "¿Suscribió?"},
             color_discrete_map=PASTEL_MAP,
             category_orders={"month": MONTH_ORDER} if var_cat == "month" else None,
+            text="cantidad",
         )
+        fig_abs.update_traces(texttemplate="%{text:,}", textposition="outside", cliponaxis=False)
         fig_abs.update_layout(xaxis_tickangle=-35)
         st.plotly_chart(fig_abs, use_container_width=True)
 
@@ -188,7 +192,9 @@ if seccion == "Dashboard EDA":
             rate, x=var_cat, y="tasa",
             labels={var_cat: var_cat, "tasa": "% que suscribió"},
             color="tasa", color_continuous_scale=PASTEL_SCALE,
+            text="tasa",
         )
+        fig_pct.update_traces(texttemplate="%{text:.1f}%", textposition="outside", cliponaxis=False)
         fig_pct.add_hline(
             y=df["y"].eq("yes").mean() * 100,
             line_dash="dash", line_color=PASTEL_LINE,
@@ -200,7 +206,7 @@ if seccion == "Dashboard EDA":
     st.markdown("---")
 
     # ---- Numéricas vs y ----
-    st.subheader(" Variables numéricas vs. resultado")
+    st.subheader("Variables numéricas vs. resultado")
     col_izq2, col_der2 = st.columns(2)
     with col_izq2:
         var_num = st.selectbox("Elegí la variable numérica:", NUM_COLS, index=NUM_COLS.index("duration"))
@@ -213,7 +219,7 @@ if seccion == "Dashboard EDA":
         st.plotly_chart(fig_box, use_container_width=True)
     with col_der2:
         fig_hist = px.histogram(
-            df, x=var_num, color="y", barmode="overlay", opacity=0.6, nbins=40,
+            df, x=var_num, color="y", barmode="overlay", opacity=0.7, nbins=40,
             color_discrete_map=PASTEL_MAP,
             labels={"y": "¿Suscribió?"},
         )
@@ -222,10 +228,10 @@ if seccion == "Dashboard EDA":
     st.markdown("---")
 
     # ---- Correlación ----
-    st.subheader(" Correlación entre variables numéricas")
+    st.subheader("Correlación entre variables numéricas")
     corr = df[NUM_COLS].corr().round(2)
     fig_corr = px.imshow(
-        corr, text_auto=True, color_continuous_scale="RdBu_r", zmin=-1, zmax=1,
+        corr, text_auto=True, color_continuous_scale=DIVERGING_SCALE, zmin=-1, zmax=1,
         aspect="auto",
     )
     st.plotly_chart(fig_corr, use_container_width=True)
@@ -309,7 +315,10 @@ if seccion == "Modelo y Métricas":
         for nombre, r in resultados.items()
     }).T.round(3)
 
-    st.dataframe(tabla_metricas.style.background_gradient(cmap="Greens", axis=0), use_container_width=True)
+    st.dataframe(
+        tabla_metricas.style.background_gradient(cmap="PuBu", axis=0),
+        use_container_width=True,
+    )
 
     mejor_modelo = tabla_metricas["ROC AUC"].idxmax()
     st.success(f"Mejor modelo según ROC AUC: **{mejor_modelo}**")
@@ -324,7 +333,7 @@ if seccion == "Modelo y Métricas":
         st.markdown("**Matriz de confusión**")
         cm = r["confusion_matrix"]
         fig_cm = px.imshow(
-            cm, text_auto=True, color_continuous_scale="Blues",
+            cm, text_auto=True, color_continuous_scale="Purples",
             x=["Predijo: No", "Predijo: Sí"], y=["Real: No", "Real: Sí"],
         )
         st.plotly_chart(fig_cm, use_container_width=True)
@@ -336,7 +345,8 @@ if seccion == "Modelo y Métricas":
             x=fpr, y=tpr,
             labels={"x": "Tasa de falsos positivos", "y": "Tasa de verdaderos positivos"},
         )
-        fig_roc.add_shape(type="line", line=dict(dash="dash"), x0=0, x1=1, y0=0, y1=1)
+        fig_roc.update_traces(line_color=PASTEL_SINGLE, fillcolor="rgba(184,198,232,0.35)")
+        fig_roc.add_shape(type="line", line=dict(dash="dash", color=PASTEL_LINE), x0=0, x1=1, y0=0, y1=1)
         fig_roc.update_yaxes(scaleanchor="x", scaleratio=1)
         st.plotly_chart(fig_roc, use_container_width=True)
 
@@ -349,7 +359,11 @@ if seccion == "Modelo y Métricas":
         importancias = pipe.named_steps["clf"].feature_importances_
         df_imp = pd.DataFrame({"variable": nombres_features, "importancia": importancias})
         df_imp = df_imp.sort_values("importancia", ascending=False).head(15)
-        fig_imp = px.bar(df_imp, x="importancia", y="variable", orientation="h")
+        fig_imp = px.bar(
+            df_imp, x="importancia", y="variable", orientation="h",
+            text="importancia", color_discrete_sequence=[PASTEL_SINGLE],
+        )
+        fig_imp.update_traces(texttemplate="%{text:.3f}", textposition="outside", cliponaxis=False)
         fig_imp.update_layout(yaxis=dict(autorange="reversed"))
         st.plotly_chart(fig_imp, use_container_width=True)
 
@@ -358,7 +372,7 @@ if seccion == "Modelo y Métricas":
 # ==================================================================
 if seccion == "Predicción de un cliente":
 
-    st.subheader(" ¿Este cliente suscribiría el depósito a plazo?")
+    st.subheader("¿Este cliente suscribiría el depósito a plazo?")
     st.markdown("Completá los datos del cliente y el modelo estima la probabilidad de que diga **sí**.")
 
     modelo_pred_nombre = st.selectbox(
@@ -405,7 +419,7 @@ if seccion == "Predicción de un cliente":
         }])
 
         proba = pipe.predict_proba(cliente)[0, 1]
-        pred = "SÍ suscribiría " if proba >= 0.5 else "probablemente NO suscribiría"
+        pred = "SÍ suscribiría" if proba >= 0.5 else "probablemente NO suscribiría"
 
         st.markdown("---")
         c1, c2 = st.columns([1, 2])
